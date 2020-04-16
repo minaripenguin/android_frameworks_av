@@ -602,6 +602,7 @@ Status AudioPolicyService::getInputForAttr(const media::AudioAttributesInternal&
         return binderStatusFromStatusT(BAD_VALUE);
     }
 
+    const uid_t callingUid =IPCThreadState::self()->getCallingUid();
     RETURN_IF_BINDER_ERROR(binderStatusFromStatusT(validateUsage(attr,
             attributionSource)));
 
@@ -614,7 +615,7 @@ Status AudioPolicyService::getInputForAttr(const media::AudioAttributesInternal&
     // type is API_INPUT_MIX_EXT_POLICY_REROUTE and by AudioService if a media projection
     // is used and input type is API_INPUT_MIX_PUBLIC_CAPTURE_PLAYBACK
     // - ECHO_REFERENCE source is controlled by captureAudioOutputAllowed()
-    if (!(recordingAllowed(attributionSource, inputSource)
+    if (!isAudioServerOrMediaServerUid(callingUid) && !(recordingAllowed(attributionSource, inputSource)
             || inputSource == AUDIO_SOURCE_FM_TUNER
             || inputSource == AUDIO_SOURCE_REMOTE_SUBMIX
             || inputSource == AUDIO_SOURCE_ECHO_REFERENCE)) {
@@ -666,6 +667,7 @@ Status AudioPolicyService::getInputForAttr(const media::AudioAttributesInternal&
     {
         status_t status;
         AudioPolicyInterface::input_type_t inputType;
+        const uid_t callingUid = IPCThreadState::self()->getCallingUid();
 
         Mutex::Autolock _l(mLock);
         {
@@ -695,7 +697,7 @@ Status AudioPolicyService::getInputForAttr(const media::AudioAttributesInternal&
                 // FIXME: use the same permission as for remote submix for now.
                 FALLTHROUGH_INTENDED;
             case AudioPolicyInterface::API_INPUT_MIX_CAPTURE:
-                if (!canCaptureOutput) {
+                if (!isAudioServerOrMediaServerUid(callingUid) && !canCaptureOutput) {
                     ALOGE("%s permission denied: capture not allowed", __func__);
                     status = PERMISSION_DENIED;
                 }
@@ -780,7 +782,7 @@ Status AudioPolicyService::startInput(int32_t portIdAidl)
     msg << "Audio recording on session " << client->session;
 
     // check calling permissions
-    if (!(startRecording(client->attributionSource, String16(msg.str().c_str()),
+    if (!isAudioServerOrMediaServerUid(IPCThreadState::self()->getCallingUid()) && !(startRecording(client->attributionSource, String16(msg.str().c_str()),
                          client->attributes.source)
             || client->attributes.source == AUDIO_SOURCE_FM_TUNER
             || client->attributes.source == AUDIO_SOURCE_REMOTE_SUBMIX
