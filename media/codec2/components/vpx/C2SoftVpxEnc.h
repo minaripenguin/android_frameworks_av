@@ -45,6 +45,12 @@ typedef enum TemporalPatternType {
     VPXTemporalLayerPatternMax = 0x7FFFFFFF
 } TemporalPatternType;
 
+/* Quantization param values defined by the spec */
+#define VPX_QP_MIN 0
+#define VPX_QP_MAX 63
+#define VPX_QP_DEFAULT_MIN VPX_QP_MIN
+#define VPX_QP_DEFAULT_MAX VPX_QP_MAX
+
 // Base class for a VPX Encoder Component
 //
 // Only following encoder settings are available (codec specific settings might
@@ -219,6 +225,7 @@ struct C2SoftVpxEnc : public SimpleC2Component {
     std::shared_ptr<C2StreamBitrateModeTuning::output> mBitrateMode;
     std::shared_ptr<C2StreamRequestSyncFrameTuning::output> mRequestSync;
     std::shared_ptr<C2StreamTemporalLayeringTuning::output> mLayering;
+    std::shared_ptr<C2StreamPictureQuantizationTuning::output> mQpBounds;
 
      C2_DO_NOT_COPY(C2SoftVpxEnc);
 };
@@ -249,6 +256,9 @@ class C2SoftVpxEnc::IntfImpl : public SimpleInterface<void>::BaseParams {
 
     static C2R LayeringSetter(bool mayBlock, C2P<C2StreamTemporalLayeringTuning::output>& me);
 
+    static C2R PictureQuantizationSetter(bool mayBlock,
+                                         C2P<C2StreamPictureQuantizationTuning::output> &me);
+
     // unsafe getters
     std::shared_ptr<C2StreamPictureSizeInfo::input> getSize_l() const { return mSize; }
     std::shared_ptr<C2StreamIntraRefreshTuning::output> getIntraRefresh_l() const {
@@ -268,6 +278,9 @@ class C2SoftVpxEnc::IntfImpl : public SimpleInterface<void>::BaseParams {
     std::shared_ptr<C2StreamColorAspectsInfo::output> getCodedColorAspects_l() const {
         return mCodedColorAspects;
     }
+    std::shared_ptr<C2StreamPictureQuantizationTuning::output> getPictureQuantization_l() const {
+        return mPictureQuantization;
+    }
     uint32_t getSyncFramePeriod() const;
     static C2R ColorAspectsSetter(bool mayBlock, C2P<C2StreamColorAspectsInfo::input> &me);
     static C2R CodedColorAspectsSetter(bool mayBlock, C2P<C2StreamColorAspectsInfo::output> &me,
@@ -286,6 +299,7 @@ class C2SoftVpxEnc::IntfImpl : public SimpleInterface<void>::BaseParams {
     std::shared_ptr<C2StreamProfileLevelInfo::output> mProfileLevel;
     std::shared_ptr<C2StreamColorAspectsInfo::input> mColorAspects;
     std::shared_ptr<C2StreamColorAspectsInfo::output> mCodedColorAspects;
+    std::shared_ptr<C2StreamPictureQuantizationTuning::output> mPictureQuantization;
 };
 
 }  // namespace android
