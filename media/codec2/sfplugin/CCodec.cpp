@@ -1973,6 +1973,7 @@ void CCodec::initiateRelease(bool sendCallback /* = true */) {
     }
 
     mChannel->reset();
+    mChannel->stopUseOutputSurface();
     // thiz holds strong ref to this while the thread is running.
     sp<CCodec> thiz(this);
     std::thread([thiz, sendCallback] { thiz->release(sendCallback); }).detach();
