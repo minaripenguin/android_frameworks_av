@@ -1513,7 +1513,9 @@ c2_status_t Codec2Client::Component::setOutputSurface(
         bqId = 0;
         mOutputBufferQueue->configure(nullIgbp, generation, 0, maxDequeueCount, nullptr);
     } else {
-        mOutputBufferQueue->configure(surface, generation, bqId, maxDequeueCount, mBase1_2 ?
+        // TODO resolve b/246707566.
+        // Do not use syncObj until the issue is resolved.
+        mOutputBufferQueue->configure(surface, generation, bqId, maxDequeueCount, false ?
                                       &syncObj : nullptr);
     }
 
