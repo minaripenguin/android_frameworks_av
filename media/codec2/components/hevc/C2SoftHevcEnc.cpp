@@ -181,9 +181,9 @@ class C2SoftHevcEnc::IntfImpl : public SimpleInterface<void>::BaseParams {
                 .withDefault(new C2StreamProfileLevelInfo::output(
                     0u, PROFILE_HEVC_MAIN, LEVEL_HEVC_MAIN_1))
                 .withFields({
-                    C2F(mProfileLevel, profile)
-                        .oneOf({C2Config::PROFILE_HEVC_MAIN,
-                                C2Config::PROFILE_HEVC_MAIN_STILL}),
+                    C2F(mProfileLevel, profile).equalTo(
+                        PROFILE_HEVC_MAIN
+                    ),
                     C2F(mProfileLevel, level)
                         .oneOf({LEVEL_HEVC_MAIN_1, LEVEL_HEVC_MAIN_2,
                                 LEVEL_HEVC_MAIN_2_1, LEVEL_HEVC_MAIN_3,
@@ -383,8 +383,8 @@ class C2SoftHevcEnc::IntfImpl : public SimpleInterface<void>::BaseParams {
 
     UWORD32 getProfile_l() const {
         switch (mProfileLevel->profile) {
-        case PROFILE_HEVC_MAIN:  [[fallthrough]];
-        case PROFILE_HEVC_MAIN_STILL: return 1;
+        case PROFILE_HEVC_MAIN:
+            return 1;
         default:
             ALOGD("Unrecognized profile: %x", mProfileLevel->profile);
             return 1;
